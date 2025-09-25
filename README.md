@@ -55,13 +55,17 @@
 
 
 <div align="left">
-  <a href="ali.ahmed05@eng-st.cu.edu.eg" target="_blank">
+  <a href="mailto:ali.ahmed05@eng-st.cu.edu.eg" target="_blank">
     <img src="https://img.shields.io/static/v1?message=Gmail&logo=gmail&label=&color=D14836&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="gmail logo"  />
   </a>
   <a href="https://www.linkedin.com/in/ali-tharwat-902817321/" target="_blank">
     <img src="https://img.shields.io/static/v1?message=LinkedIn&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="linkedin logo"  />
   </a>
+  <a href="https://my-protofilio-eta.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Portfolio&logo=About.me&label=&color=000000&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="portfolio logo"  />
+  </a>
 </div>
+
 
 
 <br clear="both">
