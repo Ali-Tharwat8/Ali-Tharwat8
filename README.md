@@ -68,8 +68,8 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="build-output/snake-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Ali-Tharwat8/Ali-Tharwat8/output/build-output/snake.svg" />
-  <img alt="github-snake" src="https://raw.githubusercontent.com/Ali-Tharwat8/Ali-Tharwat8/output/build-output/snake.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="build-output/snake-dark.svg" />
+  <img alt="github-snake" src="build-output/snake-dark.svg" />
 </picture>
 
 
