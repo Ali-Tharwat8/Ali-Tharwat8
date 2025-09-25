@@ -2,7 +2,7 @@ name: Generate snake animation
 
 on:
   schedule:
-    - cron: "0 */12 * * *"   # every 12 hours
+    - cron: "0 */12 * * *"
   workflow_dispatch:
   push:
     branches:
@@ -17,30 +17,52 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo (full history for branch ops)
         uses: actions/checkout@v4
-        # keep the default persist-credentials (true) so later push actions can use the token
+        with:
+          fetch-depth: 0
 
-      - name: Generate SVG (fast mode)
+      - name: Generate SVG
         id: generate
         uses: Platane/snk/svg-only@v3
         with:
-          # read your contribution graph (required)
           github_user_name: ${{ github.repository_owner }}
-          # list the output files you want (one per line)
           outputs: |
             dist/snake.svg
             dist/snake-dark.svg?palette=github-dark
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Show dist contents (debug)
+      - name: Debug - list dist
         run: |
-          echo "Listing generated files:"
+          echo "== dist contents =="
           ls -la dist || true
+          echo "== file info =="
           file dist/* || true
+          echo "== head of files =="
+          for f in dist/*; do
+            echo "---- $f ----"
+            head -n 8 "$f" || true
+          done
 
-      - name: Publish `dist/` to `output` branch
-        uses: crazy-max/ghaction-github-pages@v3.1.0
+      - name: Ensure output branch exists (create if missing)
+        run: |
+          git fetch origin output:output || echo "output branch may not exist yet"
+          git branch --list
+
+      - name: Copy generated files to repo root (prepare commit)
+        run: |
+          mkdir -p build-output
+          cp -f dist/* build-output/ || true
+          ls -la build-output || true
+
+      - name: Commit generated SVG to output branch
+        uses: EndBug/add-and-commit@v9
         with:
-          target_branch: ou_
+          author_name: github-actions[bot]
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+          message: "chore: update generated snake.svg [skip ci]"
+          add: "build-output/*"
+          branch: output
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
