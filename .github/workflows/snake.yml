@@ -1,68 +1,71 @@
-name: Generate snake animation
+name: Generate github-snake (generate + artifact + commit)
 
-on:
-  schedule:
-    - cron: "0 */12 * * *"
-  workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
-  contents: write
+contents: write
+
 
 jobs:
-  generate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+generate:
+runs-on: ubuntu-latest
+timeout-minutes: 15
 
-    steps:
-      - name: Checkout repo (full history for branch ops)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Generate SVG
-        id: generate
-        uses: Platane/snk/svg-only@v3
-        with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: |
-            dist/snake.svg
-            dist/snake-dark.svg?palette=github-dark
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+steps:
+- name: Checkout repo (full history)
+uses: actions/checkout@v4
+with:
+fetch-depth: 0
 
-      - name: Debug - list dist
-        run: |
-          echo "== dist contents =="
-          ls -la dist || true
-          echo "== file info =="
-          file dist/* || true
-          echo "== head of files =="
-          for f in dist/*; do
-            echo "---- $f ----"
-            head -n 8 "$f" || true
-          done
 
-      - name: Ensure output branch exists (create if missing)
-        run: |
-          git fetch origin output:output || echo "output branch may not exist yet"
-          git branch --list
+- name: Generate SVGs (Platane snk)
+id: gen
+uses: Platane/snk/svg-only@v3
+with:
+github_user_name: ${{ github.repository_owner }}
+outputs: |
+dist/snake.svg
+dist/snake-dark.svg?palette=github-dark
+env:
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Copy generated files to repo root (prepare commit)
-        run: |
-          mkdir -p build-output
-          cp -f dist/* build-output/ || true
-          ls -la build-output || true
 
-      - name: Commit generated SVG to output branch
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: github-actions[bot]
-          author_email: 41898282+github-actions[bot]@users.noreply.github.com
-          message: "chore: update generated snake.svg [skip ci]"
-          add: "build-output/*"
-          branch: output
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+- name: Debug - list dist and show heads
+run: |
+echo "=== dist listing ==="
+ls -la dist || true
+echo
+echo "=== file info ==="
+for f in dist/* || true; do
+echo "---- $f ----"
+file "$f" || true
+echo "---- head (first 20 lines) ----"
+head -n 20 "$f" || true
+echo
+done
+
+
+- name: Upload generated SVGs as artifact (inspectable)
+uses: actions/upload-artifact@v4
+with:
+name: snake-artifacts
+path: dist/*.svg
+
+
+- name: Copy generated files to repo root (prepare for commit)
+run: |
+cp -f dist/snake.svg dist/snake-dark.svg . || true
+echo "Files at repo root:"
+ls -la snake*.svg || true
+
+
+- name: Commit generated SVGs to output branch
+uses: EndBug/add-and-commit@v9
+with:
+author_name: github-actions[bot]
+author_email: 41898282+github-actions[bot]@users.noreply.github.com
+message: "chore: update github-snake SVGs [skip ci]"
+add: "snake.svg snake-dark.svg"
+branch: output
+env:
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
