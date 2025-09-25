@@ -59,6 +59,10 @@
 
 <br clear="both">
 
-<img src="https://raw.githubusercontent.com/Ali-Tharwat8/Ali-Tharwat8/output/snake.svg" alt="Snake animation" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Ali-Tharwat8/Ali-Tharwat8/output/snake-dark.svg" />
+  <img alt="github-snake" src="https://raw.githubusercontent.com/Ali-Tharwat8/Ali-Tharwat8/output/snake.svg" />
+</picture>
+
 
 ###
