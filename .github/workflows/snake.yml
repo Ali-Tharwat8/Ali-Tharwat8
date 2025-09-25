@@ -1,57 +1,46 @@
 name: Generate snake animation
 
 on:
-  # Run this workflow automatically every 12 hours
   schedule:
-    - cron: "0 */12 * * *" # Runs at 0 minutes past every 12th hour
-
-  # Allow running this workflow manually from the Actions tab on GitHub
+    - cron: "0 */12 * * *"   # every 12 hours
   workflow_dispatch:
-
-  # Also run this workflow on every push to the 'main' branch
   push:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   generate:
-    # Grant permissions for the workflow to write to the repository contents
-    permissions:
-      contents: write
-
-    # Use the latest version of Ubuntu as the runner
     runs-on: ubuntu-latest
-    timeout-minutes: 5 # Set a timeout to prevent the job from running indefinitely
+    timeout-minutes: 10
 
     steps:
-      # Step 1: Generate the snake.svg file
-      - name: Generate snake.svg
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # keep the default persist-credentials (true) so later push actions can use the token
+
+      - name: Generate SVG (fast mode)
+        id: generate
         uses: Platane/snk/svg-only@v3
         with:
-          # Use the GitHub user name of the repository owner
+          # read your contribution graph (required)
           github_user_name: ${{ github.repository_owner }}
-          # Define the output file path and palette for the snake animation
-          # The palette 'github-dark' mimics the dark theme of GitHub
-          outputs: dist/snake.svg?palette=github-dark
+          # list the output files you want (one per line)
+          outputs: |
+            dist/snake.svg
+            dist/snake-dark.svg?palette=github-dark
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 2: Save the generated SVG as a build artifact
-      # This is useful for debugging and viewing the output directly from the workflow run
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: snake-svg
-          path: dist/snake.svg
-          if-no-files-found: error # Fail the workflow if the SVG was not created
+      - name: Show dist contents (debug)
+        run: |
+          echo "Listing generated files:"
+          ls -la dist || true
+          file dist/* || true
 
-      # Step 3: Push the generated snake.svg to the 'output' branch
-      - name: Push snake.svg to the output branch
+      - name: Publish `dist/` to `output` branch
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
-          # The branch to push the generated file to
-          target_branch: output
-          # The directory containing the build output
-          build_dir: dist
-        env:
-          # The GITHUB_TOKEN is a secret automatically provided by GitHub Actions
-          # It's required to grant permission for the action to push to the repository
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          target_branch: ou_
